@@ -1,7 +1,5 @@
-import { env } from "cloudflare:workers";
 export function setting(key: string): string {
-  const bindings = env as unknown as Record<string, unknown>;
-  const value = bindings[key] ?? process.env[key];
+  const value = process.env[key];
   return typeof value === "string" ? value.trim() : "";
 }
 export function safeHttpsUrl(value: string) {

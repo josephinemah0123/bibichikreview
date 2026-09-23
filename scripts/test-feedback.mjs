@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const output = path.join(root, ".sites-runtime", "test-run");
+const output = path.join(root, ".test-runtime", "test-run");
 for (const source of ["lib/feedback.ts", "lib/email.ts", "tests/feedback.test.ts"]) {
   const target = path.join(output, source.replace(/\.ts$/, ".js"));
   mkdirSync(path.dirname(target), { recursive: true });
