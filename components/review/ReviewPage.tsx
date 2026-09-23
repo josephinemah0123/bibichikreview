@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StarRating } from "./StarRating";
 import { FeedbackForm } from "./FeedbackForm";
 import { GoogleReviewLink, PositiveReviewCard } from "./PositiveReviewCard";
@@ -10,6 +10,11 @@ export function ReviewPage({googleUrl,websiteUrl}:{googleUrl:string;websiteUrl:s
  const [draft,setDraft]=useState(EMPTY_DRAFT);
  const [sent,setSent]=useState(false);
  const [busy,setBusy]=useState(false);
+ const chooseRating=useCallback((value:number)=>{
+  if(busy)return;
+  setRating(value);setSent(false);
+  if(value>=4 && googleUrl)window.location.assign(googleUrl);
+ },[busy,googleUrl]);
  useEffect(()=>{
   const context=(document as unknown as {modelContext?:{registerTool:(tool:unknown,options:{signal:AbortSignal})=>Promise<void>|void}}).modelContext;
   if(!context?.registerTool)return;
@@ -18,12 +23,11 @@ export function ReviewPage({googleUrl,websiteUrl}:{googleUrl:string;websiteUrl:s
     if(busy)throw new Error("Feedback is being sent.");
     const value=(input as {rating?:unknown})?.rating;
     if(typeof value!=="number" || !Number.isInteger(value) || value<1 || value>5)throw new Error("Rating must be an integer from 1 to 5.");
-    setRating(value);setSent(false);
+    chooseRating(value);
     return {rating:value,section:value<=3?"feedback_form":"google_review"};
   }},{signal:lifecycle.signal})).catch(()=>{});}catch{}
   return ()=>lifecycle.abort();
- },[busy]);
- function chooseRating(value:number){setRating(value);setSent(false);}
+ },[busy,chooseRating]);
  return <div className="site-shell"><main className="review-container">
   <header className="brand-header"><div className="brand-logo" role="img" aria-label="BiBiChik"/><p className="branch-label">BiBiChik SS2</p></header>
   <section className="experience" aria-labelledby="experience-title"><h1 id="experience-title">How was your<br/>experience today?</h1><p className="intro">Your feedback helps us serve you better.</p><StarRating value={rating} onChange={chooseRating} disabled={busy}/></section>
