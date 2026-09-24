@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { feedbackSchema, EMPTY_DRAFT } from "../lib/feedback";
 import { emailPayload, sendFeedback } from "../lib/email";
 
-const config = { recipient: "josephinemah0419@gmail.com", pageUrl: "https://example.com/review/ss2" };
+const config = { recipient: "feedback@bibichik.com", pageUrl: "https://example.com/review/ss2" };
 const validFeedback = () => feedbackSchema.parse({
   ...EMPTY_DRAFT, rating: 2, categories: ["Food", "Waiting Time"],
   comment: "Please serve together.", name: "Test Customer", contact: "customer@example.com",
@@ -41,7 +41,7 @@ test("uses the recipient AJAX endpoint and accepts both success response formats
     let calls = 0;
     const transport = (async (url: unknown, init: RequestInit) => {
       calls++;
-      assert.equal(url, "https://formsubmit.co/ajax/josephinemah0419@gmail.com");
+      assert.equal(url, "https://formsubmit.co/ajax/feedback@bibichik.com");
       assert.equal(init.method, "POST");
       assert.equal(init.redirect, "error");
       assert.deepEqual(JSON.parse(init.body as string), emailPayload(validFeedback(), config.pageUrl));

@@ -1,0 +1,27 @@
+/* Scoped to Aburii: the approved BiBiChik stylesheet stays unchanged. */
+[data-theme="aburii"] {
+  --background:#191817; --foreground:#f4ebdd; --muted:#c4b7a5;
+  --primary:#783b43; --primary-foreground:#fff5e9; --accent:#c7a47a;
+  --border:#50443e; --panel:#24211f; --field:#1c1a19; --ring:#c7a47a;
+  background:var(--background); color:var(--foreground); color-scheme:dark;
+}
+[data-theme="aburii"] .review-container{background:none}
+[data-theme="aburii"] .brand-wordmark{font-family:Georgia,'Times New Roman',serif;font-size:36px;line-height:1.15;min-height:86px;display:grid;place-items:center;letter-spacing:.04em}
+[data-theme="aburii"] .branch-label,[data-theme="aburii"] .intro,[data-theme="aburii"] .rating-caption,[data-theme="aburii"] footer p,[data-theme="aburii"] .response-card p,[data-theme="aburii"] .form-group>label span,[data-theme="aburii"] .details legend span{color:var(--muted)}
+[data-theme="aburii"] .response-card{background:var(--panel);border-color:var(--border);box-shadow:none}
+[data-theme="aburii"] .category-option,[data-theme="aburii"] .form-group textarea,[data-theme="aburii"] .detail-inputs input{background:var(--field);border-color:var(--border);color:var(--foreground)}
+[data-theme="aburii"] .category-option>svg,[data-theme="aburii"] .secondary-google,[data-theme="aburii"] .footer-wordmark{color:var(--accent)}
+[data-theme="aburii"] .category-option.checked{background:#493037;border-color:var(--accent)}
+[data-theme="aburii"] .category-option [data-slot=checkbox]{background:var(--field);border-color:var(--accent)}
+[data-theme="aburii"] .category-option [data-state=checked]{background:var(--accent);color:#211b16}
+[data-theme="aburii"] .form-group textarea::placeholder,[data-theme="aburii"] .detail-inputs input::placeholder{color:var(--muted)}
+[data-theme="aburii"] .primary-button{background:var(--primary);color:var(--primary-foreground);border-color:#9e5d65}
+[data-theme="aburii"] .primary-button:hover{background:#8a464f}
+[data-theme="aburii"] .star{color:#62594e}
+[data-theme="aburii"] .star.selected{color:var(--accent)}
+[data-theme="aburii"] .star svg{stroke:#c4ac89}
+[data-theme="aburii"] .mood-icon,[data-theme="aburii"] .success-icon{background:#473731;color:#ead1aa}
+[data-theme="aburii"] footer{border-color:var(--border)}
+[data-theme="aburii"] .field-error{color:#ffb9b9}
+[data-theme="aburii"] .server-error{background:#472b30;border-color:#95606a;color:#ffe1e1}
+[data-theme="aburii"] :focus-visible{outline-color:var(--accent)}

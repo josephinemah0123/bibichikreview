@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const parsed = z.object({feedback:feedbackSchema}).strict().safeParse(raw);
   if (!parsed.success) return json({error:"Please check your feedback and try again.",issues:parsed.error.flatten()},400);
   try {
-    const recipient = setting("FEEDBACK_EMAIL") || "josephinemah0419@gmail.com";
+    const recipient = setting("FEEDBACK_EMAIL") || "feedback@bibichik.com";
     const pageUrl = new URL("/review/ss2", setting("SITE_URL") || request.url).href;
     await sendFeedback(parsed.data.feedback, {recipient, pageUrl});
     return json({success:true});

@@ -1,19 +1,20 @@
 import { z } from "zod";
 import { feedbackSchema } from "./feedback";
 
-export const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/josephinemah0419@gmail.com";
+export const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/feedback@bibichik.com";
 export const FEEDBACK_SUBJECT = "BiBiChik SS2 Customer Feedback";
 export type EmailConfig = { recipient: string; pageUrl: string };
 
-export function emailPayload(input: z.infer<typeof feedbackSchema>, pageUrl: string) {
+export function emailPayload(input: z.infer<typeof feedbackSchema>, pageUrl: string, outlet?: {id:string;brand:string;outletName:string}, createdAt?:string) {
   return {
-    Branch: "BiBiChik SS2",
+    Branch: outlet?.outletName || "BiBiChik SS2",
     Rating: input.rating + " / 5",
     "Areas to Improve": input.categories.join(", ") || "Not provided",
     Comment: input.comment || "Not provided",
     "Customer Name": input.name || "Not provided",
     "Customer Contact": input.contact || "Not provided",
-    _subject: FEEDBACK_SUBJECT,
+    ...(outlet ? { outletId:outlet.id, brand:outlet.brand, outletName:outlet.outletName, overallRating:input.rating, feedback:input.comment, createdAt:createdAt || new Date().toISOString() } : {}),
+    _subject: outlet ? `${outlet.outletName} Customer Feedback` : FEEDBACK_SUBJECT,
     _template: "table",
     _captcha: "false",
     _honey: input.website,

@@ -1,61 +1,45 @@
-# BiBiChik SS2 Review — Next.js
+# Restaurant Review System
 
-Standard Next.js 16 App Router application with React and TypeScript. The existing interface, public assets, page text, rating behaviour and direct browser-to-FormSubmit submission are preserved.
+Existing BiBiChik review project extended to three outlets using one Next.js App Router codebase. The approved SS2 stylesheet, assets and rating interface are preserved. Sunway reuses the BiBiChik theme; Aburii uses a scoped charcoal-and-cream theme.
 
-## Run locally
-Use Node.js 22.13 or later.
+## Run
+
+Use Node.js 22.13+ or 24.
+
 ```sh
 npm install
-npm run dev
-```
-Open http://localhost:3000/review/ss2.
-
-Production:
-```sh
 npm run build
-npm run start
+npm start
 ```
 
-## Deploy on Vercel
-Import this project and set:
-- Root Directory: the folder containing this package.json (`outputs/bibichik` if importing the surrounding workspace).
-- Framework Preset: **Next.js**
-- Install Command: **npm install**
-- Build Command: **npm run build**
-- Output Directory: **leave blank/default**
+For development: `npm run dev`.
 
-No custom adapter, output directory, deployment wrapper or Cloudflare service is required.
+## Routes
 
-Copy the values from `.env.example` into Vercel's environment settings before deployment:
-- `NEXT_PUBLIC_GOOGLE_REVIEW_URL`: the existing BiBiChik SS2 Google link.
-- `NEXT_PUBLIC_WEBSITE_URL`: optional main website URL for the existing return buttons.
-- `SITE_URL`: your deployed HTTPS origin.
-- `FEEDBACK_EMAIL`: retained for the existing server endpoint; the customer form directly uses the specified FormSubmit address.
+- `/review/bibichik-ss2` (existing `/review/ss2` still works)
+- `/review/bibichik-sunway-163` (alias `/review/sunway-163`)
+- `/review/aburii-yakiniku` (alias `/review/aburii`)
+- `/admin/login` and protected `/admin`
 
-Do not commit `.env.local`. Public URL configuration contains no API secrets. No email API key is needed.
+Root and `/review` still redirect to `/review/ss2`.
 
-## Preserved routes and behaviour
-- `/` and `/review` redirect to `/review/ss2`.
-- `/review/ss2` contains the unchanged review experience.
-- `/api/feedback` is retained for compatibility, but the customer form does **not** depend on it.
-- Ratings 1–3 submit JSON directly to `https://formsubmit.co/ajax/josephinemah0419@gmail.com` with `Accept: application/json`.
-- Subject: **BiBiChik SS2 Customer Feedback**.
-- Submitted fields: Branch, Rating, Areas to Improve, Comment, Customer Name, Customer Contact.
-- Existing validation, loading, success and error states are unchanged. Real submission errors are logged to the browser console.
-- Ratings 4–5 retain the existing Google Review card.
-- No dashboard or database is added.
+## Configuration
 
-FormSubmit requires the recipient's one-time activation. If it returns “This form needs Activation”, open the email sent to josephinemah0419@gmail.com and click **Activate Form**. Migrating hosting does not bypass activation.
+Outlets live in `config/outlets.ts`. Add an entry to add a route without copying pages. The new outlets' Google links and Aburii official logo are intentionally unset until supplied by the owner.
 
-## Checks
+Use `.env.example` for server settings. Supabase PostgreSQL and Auth power private storage and the shared management dashboard; run `supabase/migrations/001_review_system.sql` before enabling the connection. FormSubmit continues to receive feedback directly from the browser. Existing feedback recipient: `feedback@bibichik.com`.
+
+Without Supabase credentials, public email feedback remains available but database history and admin sign-in are not enabled. No sample data is shipped in the production application.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for Supabase setup, admin access, email behavior, exact environment variables, GoDaddy Node.js hosting, security and verification steps.
+
+## Tests
+
 ```sh
 node scripts/test-feedback.mjs
-npx tsc --noEmit
+node --test tests/database.test.mjs
+npx eslint app components/review components/admin config lib tests scripts
 npm run build
 ```
 
-The `lint` script remains exactly `next lint` at the user's explicit request. **Next.js 16 removed this command**, so `npm run lint` is not supported by this Next.js version. This does not affect installation, production builds or Vercel deployment. Use `npx eslint .` when invoking ESLint directly.
-
-## Assets
-All original files in `public/`, all review components, the checkbox primitive and `app/globals.css` are preserved. Generated test files live in the ignored `.test-runtime/` folder.
-
+The `lint` npm script remains `next lint` at the owner's prior request; Next.js 16 no longer supports it. Use the direct ESLint command above.
