@@ -1,45 +1,9 @@
-# Restaurant Review System
+# Restaurant review website
 
-Existing BiBiChik review project extended to three outlets using one Next.js App Router codebase. The approved SS2 stylesheet, assets and rating interface are preserved. Sunway reuses the BiBiChik theme; Aburii uses a scoped charcoal-and-cream theme.
+Shared Next.js review pages for BiBiChik SS2, BiBiChik Sunway 163 Mall and Aburii Yakiniku. Customer styling and assets are preserved.
 
-## Run
+Run `npm install`, `npm run build`, then `npm start`. Requires Node.js 22.13 or newer and a Node-capable hosting plan. This is not a static export.
 
-Use Node.js 22.13+ or 24.
+Low ratings send email through the Node server using Nodemailer SMTP. All outlets use the single server setting `FEEDBACK_TO_EMAIL=feedback@bibichik.com`. Positive ratings show the existing thank-you card and the configured outlet Google Review button.
 
-```sh
-npm install
-npm run build
-npm start
-```
-
-For development: `npm run dev`.
-
-## Routes
-
-- `/review/bibichik-ss2` (existing `/review/ss2` still works)
-- `/review/bibichik-sunway-163` (alias `/review/sunway-163`)
-- `/review/aburii-yakiniku` (alias `/review/aburii`)
-- `/admin/login` and protected `/admin`
-
-Root and `/review` still redirect to `/review/ss2`.
-
-## Configuration
-
-Outlets live in `config/outlets.ts`. Add an entry to add a route without copying pages. The new outlets' Google links and Aburii official logo are intentionally unset until supplied by the owner.
-
-Use `.env.example` for server settings. Supabase PostgreSQL and Auth power private storage and the shared management dashboard; run `supabase/migrations/001_review_system.sql` before enabling the connection. FormSubmit continues to receive feedback directly from the browser. Existing feedback recipient: `feedback@bibichik.com`.
-
-Without Supabase credentials, public email feedback remains available but database history and admin sign-in are not enabled. No sample data is shipped in the production application.
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for Supabase setup, admin access, email behavior, exact environment variables, GoDaddy Node.js hosting, security and verification steps.
-
-## Tests
-
-```sh
-node scripts/test-feedback.mjs
-node --test tests/database.test.mjs
-npx eslint app components/review components/admin config lib tests scripts
-npm run build
-```
-
-The `lint` npm script remains `next lint` at the owner's prior request; Next.js 16 no longer supports it. Use the direct ESLint command above.
+See DEPLOYMENT.md for configuration. Run `node scripts/test-feedback.mjs` for validation tests and `node scripts/test-smtp.mjs` for local SMTP integration tests. The latter never delivers external email.

@@ -1,71 +1,41 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { feedbackSchema, EMPTY_DRAFT } from "../lib/feedback";
-import { emailPayload, sendFeedback } from "../lib/email";
+import { feedbackMessage } from "../lib/email";
+import { outlets, findOutlet } from "../config/outlets";
+import { sameOrigin, readJson, allowSubmission } from "../lib/http-security";
 
-const config = { recipient: "feedback@bibichik.com", pageUrl: "https://example.com/review/ss2" };
-const validFeedback = () => feedbackSchema.parse({
-  ...EMPTY_DRAFT, rating: 2, categories: ["Food", "Waiting Time"],
-  comment: "Please serve together.", name: "Test Customer", contact: "customer@example.com",
+test("only low ratings, legitimate categories, and a comment or category are accepted", () => {
+ for (const rating of [0,4,5]) assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT,rating,categories:["Food"]}).success,false);
+ for(const extra of [{comment:" "},{categories:["Bogus"]},{categories:["Food"],website:"bot"},{categories:["Food"],contact:"bad@"}])
+  assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT,rating:2,...extra}).success,false);
+ assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT,rating:2,comment:"Slow"}).success,true);
 });
-
-test("requires a category or meaningful comment and only accepts ratings 1–3", () => {
-  for (const rating of [0, 4, 5]) assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating, categories:["Food"]}).success, false);
-  assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating:2, comment:"   "}).success, false);
-  assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating:2, categories:["Food"]}).success, true);
-  assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating:2, comment:"Too slow"}).success, true);
-  assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating:2, categories:["Unexpected"]}).success, false);
-  assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating:2, categories:["Food"], website:"bot"}).success, false);
+test("all three emails have the correct subject and escaped customer details", () => {
+ for(const outlet of outlets){
+  const input=feedbackSchema.parse({...EMPTY_DRAFT,rating:2,categories:["Food"],comment:'<script>alert("x")</script>',name:"Local test",contact:"tester@example.com"});
+  const mail=feedbackMessage(input,outlet,new Date("2026-09-24T00:00:00Z"));
+  assert.equal(mail.subject,`[Review Alert] ${outlet.outletName} - 2 Star Feedback`);
+  assert.ok(mail.text.includes(`Brand: ${outlet.brand}`));
+  assert.ok(mail.text.includes(`Outlet: ${outlet.outletName}`));
+  assert.ok(mail.text.includes("08:00:00"));
+  assert.ok(mail.html.includes("&lt;script&gt;"));
+  assert.ok(!mail.html.includes("<script>"));
+  assert.equal(mail.replyTo,"tester@example.com");
+  assert.ok(!("notificationEmail" in outlet));
+ }
 });
-
-test("validates optional contact and deduplicates categories", () => {
-  assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating:2, categories:["Food"], contact:"bad@"}).success, false);
-  for (const contact of ["", "+60 12-345 6789", "customer@example.com"])
-    assert.equal(feedbackSchema.safeParse({...EMPTY_DRAFT, rating:2, categories:["Food"], contact}).success, true);
-  assert.deepEqual(feedbackSchema.parse({...EMPTY_DRAFT, rating:2, categories:["Food", "Food"]}).categories, ["Food"]);
+test("optional fields remain optional and phone is not used as reply-to",()=>{
+ const mail=feedbackMessage(feedbackSchema.parse({...EMPTY_DRAFT,rating:1,categories:["Service"],contact:"+60123456789"}),outlets[0]);
+ assert.ok(mail.text.includes("Customer Phone: +60123456789"));
+ assert.ok(!mail.text.includes("Customer Name:"));
+ assert.equal(mail.replyTo,undefined);
+ assert.equal(findOutlet("ss2")?.id,"bibichik-ss2");
 });
-
-test("maps the six requested fields and exact subject to FormSubmit", () => {
-  const payload = emailPayload(validFeedback(), config.pageUrl);
-  assert.deepEqual(Object.fromEntries(Object.entries(payload).filter(([key]) => !key.startsWith("_"))), {
-    Branch: "BiBiChik SS2", Rating: "2 / 5", "Areas to Improve": "Food, Waiting Time",
-    Comment: "Please serve together.", "Customer Name": "Test Customer", "Customer Contact": "customer@example.com",
-  });
-  assert.equal(payload._subject, "BiBiChik SS2 Customer Feedback");
-  assert.equal(payload._captcha, "false");
-  assert.equal(payload._url, config.pageUrl);
+test("origin, body limits, and submission throttle",async()=>{
+ assert.equal(sameOrigin(new Request("http://localhost/api/feedback",{headers:{origin:"https://evil.example"}})),false);
+ await assert.rejects(readJson(new Request("http://localhost",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({a:"x".repeat(25000)})})));
+ const req=new Request("http://localhost");
+ for(let i=0;i<30;i++) assert.equal(allowSubmission(req),true);
+ assert.equal(allowSubmission(req),false);
 });
-
-test("uses the recipient AJAX endpoint and accepts both success response formats", async () => {
-  for (const success of [true, "true"]) {
-    let calls = 0;
-    const transport = (async (url: unknown, init: RequestInit) => {
-      calls++;
-      assert.equal(url, "https://formsubmit.co/ajax/feedback@bibichik.com");
-      assert.equal(init.method, "POST");
-      assert.equal(init.redirect, "error");
-      assert.deepEqual(JSON.parse(init.body as string), emailPayload(validFeedback(), config.pageUrl));
-      return Response.json({success});
-    }) as typeof fetch;
-    await sendFeedback(validFeedback(), config, transport);
-    assert.equal(calls, 1);
-  }
-});
-
-test("rejects failed, malformed, and network-error responses without automatic retries", async () => {
-  for (const result of [{success:false}, {success:"false"}, {}, {success:1}])
-    await assert.rejects(sendFeedback(validFeedback(), config, (async () => Response.json(result)) as typeof fetch));
-  await assert.rejects(sendFeedback(validFeedback(), config, (async () => new Response("fail", {status:500})) as typeof fetch));
-  await assert.rejects(sendFeedback(validFeedback(), config, (async () => new Response("<html>thanks</html>")) as typeof fetch));
-  let calls = 0;
-  await assert.rejects(sendFeedback(validFeedback(), config, (async () => { calls++; throw new Error("network unavailable"); }) as typeof fetch));
-  assert.equal(calls, 1);
-});
-
-test("keeps optional fields explicit when omitted", () => {
-  const payload = emailPayload(feedbackSchema.parse({...EMPTY_DRAFT, rating:1, categories:["Service"]}), config.pageUrl);
-  assert.equal(payload.Comment, "Not provided");
-  assert.equal(payload["Customer Name"], "Not provided");
-  assert.equal(payload["Customer Contact"], "Not provided");
-});
-

@@ -6,7 +6,7 @@ import path from "node:path";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const output = path.join(root, ".test-runtime", "test-run");
-for (const source of ["config/outlets.ts", "lib/feedback.ts", "lib/email.ts", "lib/reviews.ts", "tests/feedback.test.ts", "tests/outlets.test.ts"]) {
+for (const source of ["config/outlets.ts", "lib/feedback.ts", "lib/email.ts", "lib/runtime-env.ts", "lib/http-security.ts", "tests/feedback.test.ts", "tests/outlets.test.ts"]) {
   const target = path.join(output, source.replace(/\.ts$/, ".js"));
   mkdirSync(path.dirname(target), { recursive: true });
   const compiled = ts.transpileModule(readFileSync(path.join(root, source), "utf8"), {
@@ -17,3 +17,4 @@ for (const source of ["config/outlets.ts", "lib/feedback.ts", "lib/email.ts", "l
 writeFileSync(path.join(output, "package.json"), '{"type":"commonjs"}');
 const result = spawnSync(process.execPath, ["--test", path.join(output, "tests/feedback.test.js"), path.join(output, "tests/outlets.test.js")], { stdio: "inherit" });
 process.exit(result.status ?? 1);
+

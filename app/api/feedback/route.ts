@@ -1,40 +1,40 @@
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import { feedbackSchema } from "@/lib/feedback";
 import { sendFeedback } from "@/lib/email";
-import { setting } from "@/lib/runtime-env";
+import { findOutlet } from "@/config/outlets";
+import { sameOrigin, readJson, allowSubmission } from "@/lib/http-security";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const ERROR = "Something went wrong. Please try again.";
+const recent = new Map<string, {hash:string; expires:number; promise:Promise<void>}>();
 function json(body: unknown, status = 200) { return Response.json(body,{status,headers:{"Cache-Control":"no-store"}}); }
-function sameOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin) return origin === new URL(request.url).origin || origin === setting("SITE_URL");
-  return request.headers.get("sec-fetch-site") === "same-origin";
-}
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return json({error:ERROR},403);
-  if (!request.headers.get("content-type")?.startsWith("application/json")) return json({error:ERROR},415);
-  if (Number(request.headers.get("content-length") || 0) > 24000) return json({error:ERROR},413);
+  if (!allowSubmission(request)) return json({error:ERROR},429);
   let raw: unknown;
+  try { raw = await readJson(request); } catch { return json({error:ERROR},400); }
+  const parsed = z.object({id:z.string().uuid(),outletId:z.string().max(80),feedback:feedbackSchema}).strict().safeParse(raw);
+  if (!parsed.success) return json({error:"Please check your feedback and try again."},400);
+  const {id,outletId,feedback} = parsed.data;
+  const outlet = findOutlet(outletId);
+  if (!outlet || outlet.id !== outletId) return json({error:ERROR},400);
+  const now = Date.now();
+  for (const [key, item] of recent) if(item.expires <= now) recent.delete(key);
+  const hash = createHash("sha256").update(JSON.stringify({outletId,feedback})).digest("hex");
+  const existing = recent.get(id);
+  if (existing && existing.hash !== hash) return json({error:ERROR},409);
+  if (!existing && recent.size >= 1000) return json({error:ERROR},429);
   try {
-    const reader = request.body?.getReader();
-    if (!reader) return json({error:ERROR},400);
-    let size = 0;
-    const chunks: Uint8Array[] = [];
-    while (true) { const {done,value} = await reader.read(); if (done) break; size += value.byteLength; if (size > 24000) { await reader.cancel(); return json({error:ERROR},413); } chunks.push(value); }
-    const body = new Uint8Array(size); let offset = 0; for (const part of chunks) { body.set(part,offset); offset += part.length; }
-    raw = JSON.parse(new TextDecoder().decode(body));
-  } catch { return json({error:ERROR},400); }
-  const parsed = z.object({feedback:feedbackSchema}).strict().safeParse(raw);
-  if (!parsed.success) return json({error:"Please check your feedback and try again.",issues:parsed.error.flatten()},400);
-  try {
-    const recipient = setting("FEEDBACK_EMAIL") || "feedback@bibichik.com";
-    const pageUrl = new URL("/review/ss2", setting("SITE_URL") || request.url).href;
-    await sendFeedback(parsed.data.feedback, {recipient, pageUrl});
+    const promise = existing?.promise || sendFeedback(feedback,outlet);
+    if (!existing) recent.set(id,{hash,expires:now+15*60*1000,promise});
+    await promise;
     return json({success:true});
-  } catch {
-    // Never log customer feedback or provider credentials.
-    console.error("BiBiChik feedback email could not be accepted by the email provider.");
+  } catch (error) {
+    recent.delete(id);
+    // Do not log SMTP responses, credentials, or customer information.
+    const code = error && typeof error === "object" && "code" in error ? String(error.code) : "MAIL_FAILED";
+    console.error("Feedback email failed", {code});
     return json({error:ERROR},502);
   }
 }
-

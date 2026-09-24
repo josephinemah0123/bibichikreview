@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import { setting } from "./runtime-env";
 export function sameOrigin(request: Request) {
   const origin = request.headers.get("origin");
@@ -17,12 +17,17 @@ export async function readJson(request: Request, maximum = 24000): Promise<unkno
   }
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
-export function clientHash(request: Request) {
-  // Set only to an IP header overwritten by your trusted reverse proxy.
-  // No forwarded headers are trusted by default.
+const salt = randomBytes(32);
+const limits = new Map<string, {count:number; expires:number}>();
+export function allowSubmission(request: Request) {
+  const now = Date.now();
+  for (const [key,item] of limits) if(item.expires <= now) limits.delete(key);
   const header = setting("TRUSTED_CLIENT_IP_HEADER");
   const address = header ? request.headers.get(header)?.split(",")[0].trim() || "unknown" : "shared";
-  const secret = setting("RATE_LIMIT_SECRET");
-  if (!secret || secret.length < 32) throw new Error("RATE_LIMIT_SECRET must contain at least 32 characters.");
-  return createHmac("sha256", secret).update(address).digest("hex");
+  const key = createHmac("sha256",salt).update(address).digest("hex");
+  const entry = limits.get(key) || {count:0,expires:now+60000};
+  if (!limits.has(key) && limits.size >= 1000) return false;
+  entry.count++;
+  limits.set(key,entry);
+  return entry.count <= (header ? 5 : 30);
 }
