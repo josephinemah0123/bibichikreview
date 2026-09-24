@@ -19,13 +19,13 @@ export const outlets: Outlet[] = [
     id: "bibichik-sunway-163", slug: "bibichik-sunway-163", aliases: ["sunway-163"], brand: "BiBiChik",
     outletName: "BiBiChik Sunway 163 Mall", shortName: "Sunway 163 Mall", tagline: "A Taste of Nyonya Heritage",
     theme: "bibichik", logo: "/bibichik-logo-transparent.png", active: true,
-    googleReviewUrl: "", googleReviewEnv: "GOOGLE_REVIEW_URL_SUNWAY_163",
+    googleReviewUrl: "https://g.page/r/Cc3Q2nvEBsVdEBM/review", googleReviewEnv: "GOOGLE_REVIEW_URL_SUNWAY_163",
     websiteEnv: "WEBSITE_URL_BIBICHIK", websiteUrl: "",
   },
   {
     id: "aburii-yakiniku", slug: "aburii-yakiniku", aliases: ["aburii"], brand: "Aburii Yakiniku",
     outletName: "Aburii Yakiniku", shortName: "Aburii", tagline: "", theme: "aburii", logo: "", active: true,
-    googleReviewUrl: "", googleReviewEnv: "GOOGLE_REVIEW_URL_ABURII",
+    googleReviewUrl: "https://www.google.com/search?sca_esv=033d84a1d3790378&rlz=1C1VDKB_enMY1065MY1065&sxsrf=APpeQnv33Rvfs9lzKcvJ4loxKEIXmRKt9A:1790250576556&q=aburii&si=APenkKm7iecQ4G6P-TsbSMFKIQtv3EFIqRAFw-i8uEbk55Z-_7Fu2rxK5_us4aLNDyZMAOL1nQSM5Ho7C7KVF3cwiaF2X9eLv8-BmDeSavWKJI1bqaMGiteQfIBRdAo13GdfuxxcJERW&sa=X&ved=2ahUKEwiNqbKNk4eXAxX7jOEIHebGC98QrrQLegQIHhAA&biw=1536&bih=695&dpr=1.25", googleReviewEnv: "GOOGLE_REVIEW_URL_ABURII",
     websiteEnv: "WEBSITE_URL_ABURII", websiteUrl: "",
   },
 ];
