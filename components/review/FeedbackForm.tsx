@@ -10,7 +10,6 @@ export function FeedbackForm({rating,draft,onChange,onSuccess,onBusy,outlet}:{ra
  const [serverError,setServerError]=useState("");
  const guard=useRef(false);
  const formRef=useRef<HTMLFormElement>(null);
- const submission=useRef<{key:string;id:string}|null>(null);
  function update(field:keyof FeedbackDraft,value:string|string[]) { onChange({...draft,[field]:value}); setErrors(current=>({...current,[field]:"",...(field==="comment" ? {categories:""} : {})})); setServerError(""); }
  async function submit(event:React.FormEvent) {
   event.preventDefault();
@@ -19,20 +18,30 @@ export function FeedbackForm({rating,draft,onChange,onSuccess,onBusy,outlet}:{ra
   if(!parsed.success) { const next:Record<string,string>={}; for(const issue of parsed.error.issues) next[String(issue.path[0])]=issue.message; setErrors(next); requestAnimationFrame(()=>formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()); return; }
   guard.current=true;setSending(true);onBusy(true);setServerError("");setErrors({});
   try {
-   const key=JSON.stringify({outletId:outlet.id,...parsed.data});
-   if(submission.current?.key!==key)submission.current={key,id:crypto.randomUUID()};
-   const response=await fetch("/api/feedback",{
+   const response=await fetch("https://formsubmit.co/ajax/feedback@bibichik.com",{
     method:"POST",
     headers:{"Content-Type":"application/json",Accept:"application/json"},
-    body:JSON.stringify({id:submission.current.id,outletId:outlet.id,feedback:parsed.data}),
+    body:JSON.stringify({
+     Branch:outlet.outletName,
+     Rating:`${parsed.data.rating} / 5`,
+     "Areas to Improve":parsed.data.categories.join(", ") || "Not provided",
+     Comment:parsed.data.comment || "Not provided",
+     "Customer Name":parsed.data.name || "Not provided",
+     "Customer Contact":parsed.data.contact || "Not provided",
+     _subject:`[Review Alert] ${outlet.outletName} - ${parsed.data.rating} Star Feedback`,
+     _template:"table",
+     _captcha:"false",
+     _honey:parsed.data.website,
+     _url:window.location.href,
+    }),
     signal:AbortSignal.timeout(60000),
    });
    const responseBody=await response.text();
    let result:unknown;
    try { result=JSON.parse(responseBody); }
-   catch { throw {message:"Feedback service returned a non-JSON response",status:response.status}; }
-   const accepted=result!==null && typeof result==="object" && "success" in result && result.success===true;
-   if(!response.ok || !accepted) throw {message:"Feedback service could not send the email",status:response.status};
+   catch { throw {message:"FormSubmit returned a non-JSON response",status:response.status,response:responseBody}; }
+   const accepted=result!==null && typeof result==="object" && "success" in result && (result.success===true || result.success==="true");
+   if(!response.ok || !accepted) throw {message:"FormSubmit did not accept the feedback",status:response.status,response:result};
    onSuccess();
   } catch(error) {
    const details=error instanceof Error ? {name:error.name,message:error.message,stack:error.stack} : error;
