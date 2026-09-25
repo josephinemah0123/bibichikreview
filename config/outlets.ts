@@ -12,7 +12,7 @@ export const outlets: Outlet[] = [
     id: "bibichik-ss2", slug: "bibichik-ss2", aliases: ["ss2"], brand: "BiBiChik",
     outletName: "BiBiChik SS2", shortName: "SS2", tagline: "A Taste of Nyonya Heritage",
     theme: "bibichik", logo: "/bibichik-logo-transparent.png", active: true,
-    googleReviewUrl: "https://www.google.com/search?rlz=1C1VDKB_enMY1065MY1065&sca_esv=cc12825c4d4cb41c&sxsrf=APpeQntoRH0eFal3YrGmkIFDzJCTOHkJlg:1790223719844&q=bibichik+ss2&si=APenkKn5T4YN59srr511wD6k6Pufj9DEzRUvB1XJSwUeeT5afiYm1dqvDDoNOdgDswDHrM7TNw4HPQX-xk9f3KidxP0hgm0RfPPVVUJz5pUcIt7UGATtL4_o1Bh7kGOBCaS8WsUQ3diH&sa=X&sqi=2&ved=2ahUKEwjp1Y6Hr4aXAxVZbWwGHej2FR0QrrQLegQIHRAA&biw=1536&bih=695&dpr=1.25#",
+    googleReviewUrl: "https://g.page/r/CV3tOjOu1XilEBM/review",
     googleReviewEnv: "GOOGLE_REVIEW_URL_SS2", websiteEnv: "WEBSITE_URL_BIBICHIK", websiteUrl: "",
   },
   {
@@ -25,7 +25,7 @@ export const outlets: Outlet[] = [
   {
     id: "aburii-yakiniku", slug: "aburii-yakiniku", aliases: ["aburii"], brand: "Aburii Yakiniku",
     outletName: "Aburii Yakiniku", shortName: "Aburii", tagline: "", theme: "aburii", logo: "", active: true,
-    googleReviewUrl: "https://www.google.com/search?sca_esv=033d84a1d3790378&rlz=1C1VDKB_enMY1065MY1065&sxsrf=APpeQnv33Rvfs9lzKcvJ4loxKEIXmRKt9A:1790250576556&q=aburii&si=APenkKm7iecQ4G6P-TsbSMFKIQtv3EFIqRAFw-i8uEbk55Z-_7Fu2rxK5_us4aLNDyZMAOL1nQSM5Ho7C7KVF3cwiaF2X9eLv8-BmDeSavWKJI1bqaMGiteQfIBRdAo13GdfuxxcJERW&sa=X&ved=2ahUKEwiNqbKNk4eXAxX7jOEIHebGC98QrrQLegQIHhAA&biw=1536&bih=695&dpr=1.25", googleReviewEnv: "GOOGLE_REVIEW_URL_ABURII",
+    googleReviewUrl: "https://g.page/r/CTJ2TrR0rYaLEBM/review", googleReviewEnv: "GOOGLE_REVIEW_URL_ABURII",
     websiteEnv: "WEBSITE_URL_ABURII", websiteUrl: "",
   },
 ];

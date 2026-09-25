@@ -8,8 +8,7 @@ export function resolveOutlet(slug: string) {
   const legacy = outlet.id === "bibichik-ss2";
   return {
     ...outlet,
-    googleReviewUrl: safeHttpsUrl(setting(outlet.googleReviewEnv)) ||
-      (legacy ? safeHttpsUrl(setting("NEXT_PUBLIC_GOOGLE_REVIEW_URL")) : "") || outlet.googleReviewUrl,
+    googleReviewUrl: outlet.googleReviewUrl,
     websiteUrl: safeHttpsUrl(setting(outlet.websiteEnv)) ||
       (legacy ? safeHttpsUrl(setting("NEXT_PUBLIC_WEBSITE_URL")) : "") || outlet.websiteUrl,
   };
