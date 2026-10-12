@@ -24,7 +24,7 @@ export const outlets: Outlet[] = [
   },
   {
     id: "aburii-yakiniku", slug: "aburii-yakiniku", aliases: ["aburii"], brand: "Aburii Yakiniku",
-    outletName: "Aburii Yakiniku", shortName: "Aburii", tagline: "", theme: "aburii", logo: "", active: true,
+    outletName: "Aburii Yakiniku", shortName: "Aburii", tagline: "", theme: "aburii", logo: "/aburii-logo-transparent.png", active: true,
     googleReviewUrl: "https://g.page/r/CTJ2TrR0rYaLEBM/review", googleReviewEnv: "GOOGLE_REVIEW_URL_ABURII",
     websiteEnv: "WEBSITE_URL_ABURII", websiteUrl: "",
   },
