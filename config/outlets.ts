@@ -11,14 +11,14 @@ export const outlets: Outlet[] = [
   {
     id: "bibichik-ss2", slug: "bibichik-ss2", aliases: ["ss2"], brand: "BiBiChik",
     outletName: "BiBiChik SS2", shortName: "SS2", tagline: "A Taste of Nyonya Heritage",
-    theme: "bibichik", logo: "/bibichik-logo-transparent.png", active: true,
+    theme: "bibichik", logo: "/bibichik-logo-heritage.png", active: true,
     googleReviewUrl: "https://g.page/r/CV3tOjOu1XilEBM/review",
     googleReviewEnv: "GOOGLE_REVIEW_URL_SS2", websiteEnv: "WEBSITE_URL_BIBICHIK", websiteUrl: "",
   },
   {
     id: "bibichik-sunway-163", slug: "bibichik-sunway-163", aliases: ["sunway-163"], brand: "BiBiChik",
     outletName: "BiBiChik Sunway 163 Mall", shortName: "Sunway 163 Mall", tagline: "A Taste of Nyonya Heritage",
-    theme: "bibichik", logo: "/bibichik-logo-transparent.png", active: true,
+    theme: "bibichik", logo: "/bibichik-logo-heritage.png", active: true,
     googleReviewUrl: "https://g.page/r/Cc3Q2nvEBsVdEBM/review", googleReviewEnv: "GOOGLE_REVIEW_URL_SUNWAY_163",
     websiteEnv: "WEBSITE_URL_BIBICHIK", websiteUrl: "",
   },
